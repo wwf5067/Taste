@@ -1,0 +1,43 @@
+services:
+  ghost:
+    image: ghost:5-alpine
+    restart: unless-stopped
+    ports:
+      # 宿主机 2368 -> 容器 2368；浏览器访问 http://localhost:2368
+      - "2368:2368"
+    environment:
+      # 站点对外地址，本地用 localhost:2368
+      url: http://localhost:2368
+      # 数据库连接（指向下面的 db 服务）
+      database__client: mysql
+      database__connection__host: db
+      database__connection__user: ghost
+      database__connection__password: ghostpass
+      database__connection__database: ghostdb
+      NODE_ENV: production
+    volumes:
+      # 持久化 Ghost 内容：上传的图片、主题、配置都在这里，容器删了数据也不丢
+      - ghost_content:/var/lib/ghost/content
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: ghostdb
+      MYSQL_USER: ghost
+      MYSQL_PASSWORD: ghostpass
+    volumes:
+      - ghost_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  ghost_content:
+  ghost_db:

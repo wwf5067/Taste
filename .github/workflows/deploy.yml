@@ -1,0 +1,113 @@
+# 推 main 时自动部署到腾讯云 Lighthouse（与 brandshow 同一台服务器）
+#
+# Taste 是纯静态站点（VitePress），无后端：
+# - CI 里 npm build，产出 dist（~1MB）
+# - 压缩后 scp 到服务器，nginx 容器直接 serve
+# - 对外端口 8091（80=newsfeed, 8090=brandshow）
+#
+# 必需 Secrets（与 brandshow 复用同一套值）: SSH_HOST / SSH_USER / SSH_PORT / SSH_KEY
+
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-taste-production
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      - name: Pack dist
+        run: tar -czf web-dist.tar.gz -C docs/.vitepress/dist .
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p ${{ secrets.SSH_PORT || 22 }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Upload dist
+        run: |
+          scp -P ${{ secrets.SSH_PORT || 22 }} web-dist.tar.gz \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/taste-web-dist.tar.gz
+
+      - name: Upload nginx config
+        run: |
+          scp -P ${{ secrets.SSH_PORT || 22 }} deploy/nginx.conf \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/taste-nginx.conf
+
+      - name: Deploy on server
+        run: |
+          ssh -tt \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=20 \
+            -p ${{ secrets.SSH_PORT || 22 }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "bash -s" << 'REMOTE'
+            set -euo pipefail
+            APP_DIR=/opt/taste
+            PORT=8091
+
+            mkdir -p "$APP_DIR/web-dist"
+
+            # ── 静态产物 ──
+            echo "==> Updating static files..."
+            rm -rf "$APP_DIR/web-dist-staging"
+            mkdir -p "$APP_DIR/web-dist-staging"
+            tar -xzf /tmp/taste-web-dist.tar.gz -C "$APP_DIR/web-dist-staging"
+            rsync -a --delete "$APP_DIR/web-dist-staging/" "$APP_DIR/web-dist/"
+            rm -rf "$APP_DIR/web-dist-staging" /tmp/taste-web-dist.tar.gz
+            echo "Static files updated"
+
+            # ── nginx 配置 ──
+            cp /tmp/taste-nginx.conf "$APP_DIR/nginx.conf"
+            rm -f /tmp/taste-nginx.conf
+
+            # ── 启动 / 重启 nginx 容器 ──
+            if docker inspect taste-nginx >/dev/null 2>&1; then
+              echo "==> Reloading nginx container..."
+              docker restart taste-nginx
+            else
+              echo "==> Starting nginx container..."
+              docker run -d \
+                --name taste-nginx \
+                --restart unless-stopped \
+                -p ${PORT}:80 \
+                -v "$APP_DIR/nginx.conf":/etc/nginx/nginx.conf:ro \
+                -v "$APP_DIR/web-dist":/usr/share/nginx/html:ro \
+                nginx:alpine
+            fi
+
+            # ── 健康检查 ──
+            echo "==> Healthcheck..."
+            for i in $(seq 1 10); do
+              code=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 3 http://127.0.0.1:${PORT}/ || echo "000")
+              if [ "$code" = "200" ]; then
+                echo "==> OK (attempt $i)"
+                break
+              fi
+              [ "$i" = "10" ] && echo "ERROR: healthcheck failed" >&2 && exit 1
+              sleep 2
+            done
+            echo "==> Deploy complete"
+            REMOTE
