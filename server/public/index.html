@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>睿清斋 · 写文章</title>
+  <!-- 轻量 Markdown 渲染 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+  <style>
+    :root {
+      --bg: #fbfaf7; --fg: #2b2b2b; --muted: #6b7280; --line: #e6e3dc;
+      --brand: #2f4a40; --brand-2: #3c6053; --white: #fff; --danger: #b4452f;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+           background: var(--bg); color: var(--fg); line-height: 1.6; }
+    button { font: inherit; cursor: pointer; }
+    input, select, textarea { font: inherit; }
+
+    /* 登录 */
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .login-card { width: 100%; max-width: 360px; background: var(--white); border: 1px solid var(--line);
+                  border-radius: 14px; padding: 28px; }
+    .login-card h1 { margin: 0 0 4px; font-size: 22px; }
+    .login-card p { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
+    .login-card input { width: 100%; padding: 10px 12px; border: 1px solid var(--line);
+                        border-radius: 8px; margin-bottom: 12px; }
+    .btn { background: var(--brand); color: var(--white); border: none; border-radius: 8px;
+           padding: 10px 16px; width: 100%; }
+    .btn:hover { background: var(--brand-2); }
+    .btn[disabled] { opacity: .5; cursor: not-allowed; }
+    .err { color: var(--danger); font-size: 13px; min-height: 18px; margin-bottom: 8px; }
+
+    /* 编辑器 */
+    .app { display: none; max-width: 1100px; margin: 0 auto; padding: 20px; }
+    .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .topbar h1 { font-size: 20px; margin: 0; flex: 1; }
+    .topbar .ghost { background: transparent; color: var(--muted); border: 1px solid var(--line);
+                     border-radius: 8px; padding: 6px 12px; width: auto; }
+    .meta { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .meta label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+    .meta input, .meta select { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+    .tags-row label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+    .tags-row input { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+    .editor { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .editor textarea { width: 100%; min-height: 380px; padding: 12px; border: 1px solid var(--line);
+                       border-radius: 10px; resize: vertical; font-family: ui-monospace, Menlo, monospace; font-size: 14px; }
+    .preview { border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; overflow: auto;
+               min-height: 380px; background: var(--white); }
+    .preview img { max-width: 100%; }
+    .dropzone { margin: 12px 0; padding: 14px; border: 1px dashed var(--line); border-radius: 10px;
+                text-align: center; color: var(--muted); font-size: 14px; background: var(--white); }
+    .dropzone.drag { border-color: var(--brand); color: var(--brand); }
+    .actions { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+    .actions .btn { width: auto; padding: 10px 22px; }
+    .status { font-size: 14px; color: var(--muted); }
+    .status.ok { color: var(--brand); }
+    .status.err { color: var(--danger); }
+    @media (max-width: 760px) {
+      .meta { grid-template-columns: 1fr; }
+      .editor { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 登录视图 -->
+  <div class="login-wrap" id="loginView">
+    <div class="login-card">
+      <h1>睿清斋 · 写文章</h1>
+      <p>输入口令进入写作后台</p>
+      <div class="err" id="loginErr"></div>
+      <input type="password" id="pwd" placeholder="口令" autocomplete="current-password" />
+      <button class="btn" id="loginBtn">进入</button>
+    </div>
+  </div>
+
+  <!-- 编辑器视图 -->
+  <div class="app" id="appView">
+    <div class="topbar">
+      <h1>写文章</h1>
+      <button class="ghost" id="logoutBtn">退出</button>
+    </div>
+
+    <div class="meta">
+      <label>标题<input type="text" id="title" placeholder="例如：改善睡眠的实践记录" /></label>
+      <label>板块<select id="section"></select></label>
+      <label>日期<input type="date" id="date" /></label>
+    </div>
+    <div class="tags-row">
+      <label>标签（可选，逗号分隔）<input type="text" id="tags" placeholder="例如：作息, 复盘" /></label>
+    </div>
+
+    <div class="dropzone" id="dropzone">把图片拖到这里上传，或<input type="file" id="fileInput" accept="image/*" style="display:none" /><a href="#" id="pickFile" style="color:var(--brand)">点击选择</a>，会自动插入到正文光标处</div>
+
+    <div class="editor">
+      <textarea id="body" placeholder="在这里用 Markdown 写正文…"></textarea>
+      <div class="preview" id="preview"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="publishBtn">发布</button>
+      <span class="status" id="status"></span>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id)
+    const api = (p, opts) => fetch('/api' + p, { credentials: 'same-origin', ...opts })
+
+    // ── 登录 ──
+    async function tryEnter() {
+      const r = await api('/me')
+      if (r.ok) { const d = await r.json(); enterApp(d.sections); }
+    }
+    $('loginBtn').onclick = login
+    $('pwd').addEventListener('keydown', (e) => { if (e.key === 'Enter') login() })
+    async function login() {
+      $('loginErr').textContent = ''
+      $('loginBtn').disabled = true
+      try {
+        const r = await api('/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: $('pwd').value }),
+        })
+        if (!r.ok) { const d = await r.json().catch(() => ({})); $('loginErr').textContent = d.error || '登录失败'; return }
+        const me = await (await api('/me')).json()
+        enterApp(me.sections)
+      } finally { $('loginBtn').disabled = false }
+    }
+
+    function enterApp(sections) {
+      $('loginView').style.display = 'none'
+      $('appView').style.display = 'block'
+      const sel = $('section')
+      const labels = { health: '养息', perfume: '闻香', photography: '取景', emotion: '观心' }
+      sel.innerHTML = sections.map((s) => `<option value="${s}">${labels[s] || s}</option>`).join('')
+      const t = new Date()
+      $('date').value = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`
+      renderPreview()
+    }
+
+    $('logoutBtn').onclick = async () => { await api('/logout', { method: 'POST' }); location.reload() }
+
+    // ── 实时预览 ──
+    function renderPreview() { $('preview').innerHTML = marked.parse($('body').value || '*预览区*') }
+    $('body').addEventListener('input', renderPreview)
+
+    // ── 图片上传 ──
+    function insertAtCursor(text) {
+      const ta = $('body'); const s = ta.selectionStart, e = ta.selectionEnd
+      ta.value = ta.value.slice(0, s) + text + ta.value.slice(e)
+      ta.selectionStart = ta.selectionEnd = s + text.length
+      renderPreview(); ta.focus()
+    }
+    async function uploadImage(file) {
+      const fd = new FormData(); fd.append('image', file)
+      $('status').textContent = '上传图片中…'; $('status').className = 'status'
+      const r = await api('/upload', { method: 'POST', body: fd })
+      const d = await r.json().catch(() => ({}))
+      if (!r.ok) { $('status').textContent = '上传失败：' + (d.error || ''); $('status').className = 'status err'; return }
+      insertAtCursor(`\n![${file.name}](${d.url})\n`)
+      $('status').textContent = '图片已插入'; $('status').className = 'status ok'
+    }
+    $('pickFile').onclick = (e) => { e.preventDefault(); $('fileInput').click() }
+    $('fileInput').onchange = () => { if ($('fileInput').files[0]) uploadImage($('fileInput').files[0]) }
+    const dz = $('dropzone')
+    ;['dragenter','dragover'].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add('drag') }))
+    ;['dragleave','drop'].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove('drag') }))
+    dz.addEventListener('drop', (e) => { const f = e.dataTransfer.files[0]; if (f) uploadImage(f) })
+
+    // ── 发布 ──
+    $('publishBtn').onclick = async () => {
+      const title = $('title').value.trim()
+      if (!title) { $('status').textContent = '请填标题'; $('status').className = 'status err'; return }
+      $('publishBtn').disabled = true
+      $('status').textContent = '正在发布…'; $('status').className = 'status'
+      try {
+        const r = await api('/publish', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title, section: $('section').value, date: $('date').value,
+            tags: $('tags').value, body: $('body').value,
+          }),
+        })
+        const d = await r.json().catch(() => ({}))
+        if (!r.ok) { $('status').textContent = '发布失败：' + (d.error || ''); $('status').className = 'status err'; return }
+        $('status').textContent = `已发布！文章地址：${d.url}（约 1 分钟内生效）`
+        $('status').className = 'status ok'
+        $('title').value = ''; $('tags').value = ''; $('body').value = ''; renderPreview()
+      } finally { $('publishBtn').disabled = false }
+    }
+
+    tryEnter()
+  </script>
+</body>
+</html>

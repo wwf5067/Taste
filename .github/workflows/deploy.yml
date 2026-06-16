@@ -1,17 +1,13 @@
-# 推 main 时自动部署到腾讯云 Lighthouse（与 brandshow 同一台服务器）
+# ⚠️ 已停用自动部署：内容真相源已迁至服务器（/opt/taste/repo），由发布后端就地构建。
+#    若仍在 push 时自动 scp 部署，会用仓库内容覆盖作者在后台发布的文章。
+#    因此触发器改为「仅手动」(workflow_dispatch)，仅在需要从仓库强制覆盖服务器时手动运行。
+#    日常发文走服务器后台 https://<IP>:8443/admin/ ，不经此 workflow。
 #
-# Taste 是纯静态站点（VitePress），无后端：
-# - CI 里 npm build，产出 dist（~1MB）
-# - 压缩后 scp 到服务器，nginx 容器直接 serve
-# - 对外端口 8091（80=newsfeed, 8090=brandshow）
-#
-# 必需 Secrets（与 brandshow 复用同一套值）: SSH_HOST / SSH_USER / SSH_PORT / SSH_KEY
+# 必需 Secrets: SSH_HOST / SSH_USER / SSH_PORT / SSH_KEY
 
-name: deploy
+name: deploy (manual only)
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch: {}
 
 concurrency:

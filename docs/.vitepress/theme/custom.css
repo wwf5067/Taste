@@ -1,0 +1,221 @@
+/*
+ * Taste · INFJ 文艺范主题 —— 暖白书香 + 墨绿点缀
+ * 移植自 Ghost「睿清斋」自定义样式，适配 VitePress 默认主题。
+ *
+ * 设计语言：
+ *   - 米白纸感背景、墨黑微绿正文、深墨绿强调
+ *   - 衬线字体（宋体系）、宽行距、克制留白、去花哨边框
+ *
+ * 微调参考：
+ *   - 背景太黄  -> 把 #f6f3ec 改为更浅的 #faf8f2
+ *   - 墨绿更深  -> #2f4a40 改为 #283e35；更亮 -> #3a5a4d
+ */
+
+/* ============ 字体：书卷气衬线 ============ */
+:root {
+  --vp-font-family-base: "Songti SC", "Noto Serif SC", "Source Han Serif SC",
+    "STSong", Georgia, "Times New Roman", serif;
+  /* 代码块仍用等宽，保证可读性 */
+  --vp-font-family-mono: "JetBrains Mono", "Fira Code", ui-monospace,
+    SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* ============ 亮色：暖白书香 + 墨绿点缀 ============ */
+:root {
+  /* 背景：米白纸感，分三层叠出温润层次 */
+  --vp-c-bg: #f6f3ec;
+  --vp-c-bg-alt: #f1ede3;
+  --vp-c-bg-soft: #efeae0;
+  --vp-c-bg-elv: #faf8f2;
+
+  /* 文字：墨黑微带绿，柔和不刺眼 */
+  --vp-c-text-1: #2b302c;
+  --vp-c-text-2: #6f7a72;
+  --vp-c-text-3: #97a097;
+
+  /* 边框：浅灰绿，几乎不存在感 */
+  --vp-c-border: #dde3dc;
+  --vp-c-divider: #e3e7df;
+  --vp-c-gutter: #e3e7df;
+
+  /* 强调色：深墨绿 */
+  --vp-c-brand-1: #2f4a40;
+  --vp-c-brand-2: #3a5a4d;
+  --vp-c-brand-3: #45685a;
+  --vp-c-brand-soft: rgba(47, 74, 64, 0.10);
+
+  /* 链接沿用强调色 */
+  --vp-c-brand-text: #2f4a40;
+}
+
+/* ============ 暗色：墨夜书房（深墨绿基调，护眼暖灰）============ */
+.dark {
+  --vp-c-bg: #1a1f1c;
+  --vp-c-bg-alt: #161a17;
+  --vp-c-bg-soft: #202622;
+  --vp-c-bg-elv: #202622;
+
+  --vp-c-text-1: #e6e3da;
+  --vp-c-text-2: #a8b0a6;
+  --vp-c-text-3: #6f7a72;
+
+  --vp-c-border: #2e3631;
+  --vp-c-divider: #2a312c;
+  --vp-c-gutter: #2a312c;
+
+  --vp-c-brand-1: #8fb5a4;
+  --vp-c-brand-2: #a3c5b6;
+  --vp-c-brand-3: #b5d3c6;
+  --vp-c-brand-soft: rgba(143, 181, 164, 0.14);
+  --vp-c-brand-text: #8fb5a4;
+}
+
+/* ============ 标题：衬线 + 克制字重 ============ */
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3,
+.vp-doc h4,
+.VPHero .name,
+.VPHero .text {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* 二级标题分隔线弱化，靠留白呼吸 */
+.vp-doc h2 {
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 1.6em;
+  margin-top: 2.4em;
+}
+
+/* ============ 正文阅读排版：宽行距、收窄宽度 ============ */
+.vp-doc {
+  line-height: 1.9;
+  letter-spacing: 0.01em;
+}
+.vp-doc p {
+  margin: 1.3em 0;
+}
+.vp-doc li {
+  line-height: 1.85;
+}
+
+/* 内容区收窄一点，更接近书页阅读宽度 */
+.VPDoc .content-container {
+  max-width: 720px;
+}
+
+/* ============ 链接：深墨绿，hover 仅降透明度，不花哨 ============ */
+.vp-doc a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s ease;
+}
+.vp-doc a:hover {
+  opacity: 0.72;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+/* ============ 引用块：左墨绿细线，米白底，书摘感 ============ */
+.vp-doc blockquote {
+  border-left: 3px solid var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
+  padding: 0.6em 1.2em;
+  border-radius: 0 4px 4px 0;
+  color: var(--vp-c-text-2);
+}
+.vp-doc blockquote p {
+  margin: 0.4em 0;
+}
+
+/* ============ 顶部导航：安静克制，细底线 ============ */
+.VPNav {
+  background-color: transparent;
+}
+.VPNavBar {
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+.VPNavBarMenuLink {
+  letter-spacing: 0.04em;
+}
+
+/* ============ 首页 Hero：弱化大字重，文艺克制 ============ */
+.VPHero .name {
+  letter-spacing: 0.04em;
+}
+.VPHero .tagline {
+  color: var(--vp-c-text-2);
+  letter-spacing: 0.02em;
+  line-height: 1.7;
+}
+
+/* Hero 主按钮：墨绿实底 */
+.VPButton.brand {
+  background-color: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+}
+.VPButton.brand:hover {
+  background-color: var(--vp-c-brand-2);
+  border-color: var(--vp-c-brand-2);
+}
+/* Hero 次按钮：描边墨绿 */
+.VPButton.alt {
+  background-color: transparent;
+  border-color: var(--vp-c-border);
+  color: var(--vp-c-text-1);
+}
+.VPButton.alt:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+  background-color: var(--vp-c-brand-soft);
+}
+
+/* ============ 首页 Features 卡片：去边框，靠留白与微底色分隔 ============ */
+.VPFeature {
+  border: 1px solid transparent;
+  background-color: var(--vp-c-bg-elv);
+  box-shadow: none;
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.VPFeature:hover {
+  border-color: var(--vp-c-border);
+  transform: translateY(-2px);
+}
+.VPFeature .title {
+  letter-spacing: 0.02em;
+}
+.VPFeature .details {
+  color: var(--vp-c-text-2);
+  line-height: 1.8;
+}
+
+/* ============ 侧边栏：安静，激活项墨绿 ============ */
+.VPSidebarItem.is-active > .item .text {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+/* ============ 代码块：略降饱和，融入暖白基调 ============ */
+.vp-doc div[class*="language-"] {
+  border-radius: 6px;
+}
+
+/* ============ 分隔线：弱化 ============ */
+.vp-doc hr {
+  border-top: 1px solid var(--vp-c-divider);
+  margin: 2.4em 0;
+}
+
+/* ============ 表格：去重边框 ============ */
+.vp-doc table {
+  border-collapse: collapse;
+}
+.vp-doc th,
+.vp-doc td {
+  border: 1px solid var(--vp-c-divider);
+}
+.vp-doc tr:nth-child(2n) {
+  background-color: var(--vp-c-bg-soft);
+}

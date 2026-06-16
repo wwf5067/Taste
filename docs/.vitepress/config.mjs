@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: 'Taste',
+  title: '睿清斋',
   description: '一个涵盖衣食住行的个人兴趣知识库',
   lastUpdated: true,
   cleanUrls: true,
@@ -10,16 +10,16 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
-      { text: '健康生活', link: '/health/' },
-      { text: '香水研究', link: '/perfume/' },
-      { text: '摄影学习', link: '/photography/' },
-      { text: '情感分析', link: '/emotion/' },
+      { text: '养息', link: '/health/' },
+      { text: '闻香', link: '/perfume/' },
+      { text: '取景', link: '/photography/' },
+      { text: '观心', link: '/emotion/' },
     ],
 
     sidebar: {
       '/health/': [
         {
-          text: '健康生活',
+          text: '养息',
           items: [
             { text: '概览', link: '/health/' },
             { text: '改善睡眠的实践记录', link: '/health/2026-改善睡眠' },
@@ -28,7 +28,7 @@ export default defineConfig({
       ],
       '/perfume/': [
         {
-          text: '香水研究',
+          text: '闻香',
           items: [
             { text: '概览', link: '/perfume/' },
           ],
@@ -36,7 +36,7 @@ export default defineConfig({
       ],
       '/photography/': [
         {
-          text: '摄影学习',
+          text: '取景',
           items: [
             { text: '概览', link: '/photography/' },
           ],
@@ -44,7 +44,7 @@ export default defineConfig({
       ],
       '/emotion/': [
         {
-          text: '情感分析',
+          text: '观心',
           items: [
             { text: '概览', link: '/emotion/' },
           ],

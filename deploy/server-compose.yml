@@ -1,0 +1,40 @@
+# 服务器端运行栈：发布后端 + nginx（共享网络与卷）
+# 在服务器 /opt/taste/repo 下执行：
+#   docker compose -f deploy/server-compose.yml --env-file /opt/taste/server.env up -d --build
+#
+# 内容真相源 = /opt/taste/repo（本机），后端就地构建后产物落到 /opt/taste/web-dist，nginx 直接 serve。
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/server.Dockerfile
+    container_name: taste-backend
+    restart: unless-stopped
+    env_file:
+      - /opt/taste/server.env
+    volumes:
+      - /opt/taste/repo:/opt/taste/repo            # 源码（含 docs），就地构建
+      - /opt/taste/web-dist:/opt/taste/web-dist    # 构建产物，与 nginx 共享
+    networks:
+      - taste
+
+  nginx:
+    image: nginx:alpine
+    container_name: taste-nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8091:80"      # 公开站点（HTTP）
+      - "8443:443"     # 作者后台（HTTPS 自签）
+    volumes:
+      - /opt/taste/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /opt/taste/web-dist:/usr/share/nginx/html:ro
+      - /opt/taste/certs:/etc/nginx/certs:ro
+    networks:
+      - taste
+
+networks:
+  taste:
+    driver: bridge
