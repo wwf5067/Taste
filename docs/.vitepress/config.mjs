@@ -4,7 +4,8 @@ export default defineConfig({
   lang: 'zh-CN',
   title: '睿清斋',
   description: '一个涵盖衣食住行的个人兴趣知识库',
-  lastUpdated: true,
+  // 内容真相源已迁至服务器（非 git 仓库），lastUpdated 依赖 git 会导致构建失败，关闭。
+  lastUpdated: false,
   cleanUrls: true,
 
   themeConfig: {
@@ -14,6 +15,9 @@ export default defineConfig({
       { text: '闻香', link: '/perfume/' },
       { text: '取景', link: '/photography/' },
       { text: '观心', link: '/emotion/' },
+      { text: '惜物', link: '/keepsake/' },
+      { text: '裁衣', link: '/attire/' },
+      { text: '豢趣', link: '/pets/' },
     ],
 
     sidebar: {
@@ -47,6 +51,30 @@ export default defineConfig({
           text: '观心',
           items: [
             { text: '概览', link: '/emotion/' },
+          ],
+        },
+      ],
+      '/keepsake/': [
+        {
+          text: '惜物',
+          items: [
+            { text: '概览', link: '/keepsake/' },
+          ],
+        },
+      ],
+      '/attire/': [
+        {
+          text: '裁衣',
+          items: [
+            { text: '概览', link: '/attire/' },
+          ],
+        },
+      ],
+      '/pets/': [
+        {
+          text: '豢趣',
+          items: [
+            { text: '概览', link: '/pets/' },
           ],
         },
       ],

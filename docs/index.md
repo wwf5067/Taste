@@ -18,6 +18,15 @@ hero:
     - theme: alt
       text: 观心
       link: /emotion/
+    - theme: alt
+      text: 惜物
+      link: /keepsake/
+    - theme: alt
+      text: 裁衣
+      link: /attire/
+    - theme: alt
+      text: 豢趣
+      link: /pets/
 
 features:
   - icon: 🌿
@@ -36,6 +45,18 @@ features:
     title: 观心
     details: 对人、对事、对自己的观察与复盘
     link: /emotion/
+  - icon: 🕯️
+    title: 惜物
+    details: 珍惜身边有故事的物件，记录它们的来历
+    link: /keepsake/
+  - icon: 🧵
+    title: 裁衣
+    details: 穿搭、面料与衣物，把衣着穿出心意
+    link: /attire/
+  - icon: 🐾
+    title: 豢趣
+    details: 与小生命相伴的日常、成长与温暖
+    link: /pets/
 ---
 
 ## 关于这个站点
