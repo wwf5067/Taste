@@ -11,6 +11,6 @@
 
 ## 笔记
 
-- [改善睡眠的实践记录](./2026-改善睡眠.md)
+<PostList section="health" />
 
 > 新增笔记：在 `docs/health/` 目录下新建 `.md` 文件即可。

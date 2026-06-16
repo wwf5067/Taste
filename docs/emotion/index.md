@@ -11,4 +11,4 @@
 
 ## 笔记
 
-> 还没有笔记。在 `docs/emotion/` 目录下新建 `.md` 文件开始记录，例如 `docs/emotion/2026-月度复盘.md`。
+<PostList section="emotion" />

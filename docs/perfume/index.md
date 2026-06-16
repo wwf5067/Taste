@@ -11,4 +11,4 @@
 
 ## 笔记
 
-> 还没有笔记。在 `docs/perfume/` 目录下新建 `.md` 文件开始记录，例如 `docs/perfume/某款香水-试香笔记.md`。
+<PostList section="perfume" />
